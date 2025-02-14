@@ -7,11 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     var countryUser;
 
     // Инициализация TON Connect UI
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: "https://leonardokotu.github.io/mysite/tonconnect-manifest.json", // URL манифеста
-        buttonRootId: 'ton-connect' // ID элемента для кнопки подключения
-    });
-
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: `https://leonardokotu.github.io/mysite/tonconnect-manifest.json`,
+    buttonRootId: 'ton-connect'
+});
     // Получение IP и страны пользователя
     fetch('https://ipapi.co/json/')
         .then(response => response.json())
