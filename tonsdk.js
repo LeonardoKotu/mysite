@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Инициализация TON Connect UI
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: `https://${domain}/tonconnect-manifest.json`, // URL манифеста
+        manifestUrl: `https://leonardokotu.github.io/mysite/tonconnect-manifest.json`, // URL манифеста
+
         buttonRootId: 'ton-connect' // ID элемента для кнопки подключения
     });
 
